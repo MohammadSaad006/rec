@@ -1,1 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Loader</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #000000;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+    
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+    
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #000000;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-size: 1.2rem;
+      color: #000000;
+      text-align: center;
+    }
+    
+    .video-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .video-container:hover .video-controls {
+      opacity: 1;
+    }
+    
+    .control-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #000000;
+      border: 1px solid #cccccc;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+    
+    .fullscreen-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000000;
+      border: 1px solid #cccccc;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .video-container:hover .fullscreen-btn {
+      opacity: 1;
+    }
+    
+    .fullscreen-btn:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .video-controls {
+        bottom: 10px;
+        gap: 5px;
+      }
+      
+      .control-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      
+      .fullscreen-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe 
+      class="video-player" 
+      id="videoPlayer"
+      src="https://www.youtube.com/embed/y25k0SImB8Y?autoplay=1&loop=1&playlist=y25k0SImB8Y&enablejsapi=1&origin=window.location.origin"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
+      allowfullscreen>
+    </iframe>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+      <div style="text-align: center;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Video...</div>
+      </div>
+    </div>
+    
+    <button class="fullscreen-btn" id="fullscreenBtn">Fullscreen</button>
+    
+    <div class="video-controls">
+      <button class="control-btn" id="playPauseBtn">Pause</button>
+      <button class="control-btn" id="restartBtn">Restart</button>
+      <button class="control-btn" id="muteBtn">Mute</button>
+    </div>
+  </div>
 
+  <script>
+    const video = document.getElementById('videoPlayer');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const muteBtn = document.getElementById('muteBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    
+    // Hide loading overlay when iframe loads
+    const iframe = document.getElementById('videoPlayer');
+    
+    iframe.addEventListener('load', () => {
+      setTimeout(() => {
+        loadingOverlay.classList.add('hidden');
+      }, 2000); // Delay for smooth transition
+    });
+    
+    // Show loading overlay initially
+    loadingOverlay.classList.remove('hidden');
+    
+    // YouTube iframe controls (limited functionality)
+    playPauseBtn.addEventListener('click', () => {
+      // YouTube iframe doesn't support direct play/pause control
+      // This is just for show
+      playPauseBtn.textContent = playPauseBtn.textContent === 'Pause' ? 'Play' : 'Pause';
+    });
+    
+    // Restart button
+    restartBtn.addEventListener('click', () => {
+      // Reload the iframe to restart
+      iframe.src = iframe.src;
+    });
+    
+    // Mute/Unmute button
+    muteBtn.addEventListener('click', () => {
+      // Toggle mute parameter in URL
+      const currentSrc = iframe.src;
+      if (currentSrc.includes('mute=1')) {
+        iframe.src = currentSrc.replace('mute=1', 'mute=0');
+        muteBtn.textContent = 'Mute';
+      } else {
+        iframe.src = currentSrc.replace('mute=0', 'mute=1');
+        muteBtn.textContent = 'Unmute';
+      }
+    });
+    
+    // Fullscreen button
+    fullscreenBtn.addEventListener('click', () => {
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      } else if (iframe.webkitRequestFullscreen) {
+        iframe.webkitRequestFullscreen();
+      } else if (iframe.msRequestFullscreen) {
+        iframe.msRequestFullscreen();
+      }
+    });
+    
+    // Update button text based on iframe state (limited)
+    // YouTube iframe doesn't provide play/pause events
+    // So we'll just set initial states
+    playPauseBtn.textContent = 'Pause';
+    muteBtn.textContent = 'Mute'; // Changed to Mute since audio is now enabled by default
+    
+    // Keyboard shortcuts (limited for YouTube iframe)
+    document.addEventListener('keydown', (e) => {
+      switch(e.code) {
+        case 'KeyM':
+          e.preventDefault();
+          // Toggle mute
+          const currentSrc = iframe.src;
+          if (currentSrc.includes('mute=1')) {
+            iframe.src = currentSrc.replace('mute=1', 'mute=0');
+            muteBtn.textContent = 'Mute';
+          } else {
+            iframe.src = currentSrc.replace('mute=0', 'mute=1');
+            muteBtn.textContent = 'Unmute';
+          }
+          break;
+        case 'KeyR':
+          e.preventDefault();
+          // Restart video
+          iframe.src = iframe.src;
+          break;
+        case 'KeyF':
+          e.preventDefault();
+          if (iframe.requestFullscreen) {
+            iframe.requestFullscreen();
+          }
+          break;
+      }
+    });
+    
+    // Auto-hide controls after inactivity
+    let controlsTimeout;
+    const videoContainer = document.querySelector('.video-container');
+    
+    function showControls() {
+      videoContainer.style.cursor = 'default';
+      clearTimeout(controlsTimeout);
+      controlsTimeout = setTimeout(() => {
+        videoContainer.style.cursor = 'none';
+      }, 3000);
+    }
+    
+    videoContainer.addEventListener('mousemove', showControls);
+    videoContainer.addEventListener('click', showControls);
+    
+    // Initialize
+    showControls();
+  </script>
+</body>
+</html> 
